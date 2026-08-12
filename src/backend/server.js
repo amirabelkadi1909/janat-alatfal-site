@@ -4,25 +4,35 @@ import cors from 'cors';
 
 const app = express();
 
+// Enable CORS so your Vercel frontend can send requests
 app.use(cors());
 app.use(express.json());
 
+// Database Connection Pool using Environment Variables (Render / TiDB)
 const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '', // Your MySQL password (leave empty for default XAMPP)
-  database: 'kindergarten_db'
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'kindergarten_db',
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 4000,
+  // SSL Configuration required by TiDB Cloud
+  ssl: process.env.DB_HOST ? {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: false
+  } : false
 });
 
+// Test Connection on Server Startup
 db.getConnection((err, connection) => {
   if (err) {
     console.error('Database connection failed:', err.message);
   } else {
-    console.log('Connected to MySQL database!');
+    console.log('Successfully connected to Database! 🎉');
     connection.release();
   }
 });
 
+// Registration Endpoint
 app.post('/api/register', (req, res) => {
   const { childName, parentName, age, phone, email, message } = req.body;
 
@@ -48,6 +58,8 @@ app.post('/api/register', (req, res) => {
   );
 });
 
-app.listen(5000, () => {
-  console.log('Server running on http://localhost:5000');
+// Listen on Render's dynamic PORT variable (defaults to 5000 locally)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
