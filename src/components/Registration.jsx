@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, CheckCircle, User, Phone, Mail, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+// Environment variable for production API URL (Render) or local fallback
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function Registration() {
   const { language, t } = useLanguage();
   
@@ -17,7 +20,7 @@ export default function Registration() {
   });
 
   const [errors, setErrors] = useState({});
-  const [apiError, setApiError] = useState(''); // NEW: Tracks server errors
+  const [apiError, setApiError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -27,7 +30,7 @@ export default function Registration() {
       ...formData,
       [name]: value
     });
-    // Clear validation error when typing
+    
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -52,7 +55,6 @@ export default function Registration() {
       newErrors.age = t.registration.validation.age;
     }
 
-    // Basic Algerian phone regex: must be digits, between 9 and 14 digits
     const phoneRegex = /^[0-9]{9,12}$/;
     if (!formData.phone.trim()) {
       newErrors.phone = t.registration.validation.phone;
@@ -71,7 +73,6 @@ export default function Registration() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // UPDATED: Real backend integration replacing setTimeout
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -80,7 +81,7 @@ export default function Registration() {
     setApiError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,6 @@ export default function Registration() {
         setShowSuccess(true);
         triggerConfetti();
 
-        // Clear Form on success
         setFormData({
           childName: '',
           parentName: '',
@@ -104,7 +104,6 @@ export default function Registration() {
           message: ''
         });
       } else {
-        // Handle server validation error
         setApiError(data.error || (language === 'ar' ? 'حدث خطأ غير متوقع، يرجى المحاولة لاحقاً' : 'Une erreur s\'est produite'));
       }
     } catch (error) {
@@ -120,7 +119,6 @@ export default function Registration() {
   };
 
   const triggerConfetti = () => {
-    // School burst confetti
     const duration = 2 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
