@@ -126,9 +126,29 @@ export default function Footer() {
 
         </div>
 
-        {/* Bottom copyright details */}
-        <div className="mt-16 pt-8 border-t border-slate-800 text-center text-xs sm:text-sm font-semibold">
+        {/* Bottom copyright & Developer Credit */}
+        <div className="mt-16 pt-8 border-t border-slate-800 text-center text-xs sm:text-sm font-semibold flex flex-col gap-2 items-center">
           <p>{t.footer.rights}</p>
+
+          <div className="flex items-center justify-center gap-2 text-xs text-slate-400 flex-wrap">
+            {language === 'ar' ? (
+              <span>
+                تم التطوير بكل ❤️ بواسطة <strong className="text-rose-400 font-extrabold">Studio S&A</strong>
+              </span>
+            ) : (
+              <span>
+                Designed & Developed with ❤️ by <strong className="text-rose-400 font-extrabold">Studio S&A</strong>
+              </span>
+            )}
+            <span className="hidden sm:inline">•</span>
+            <a 
+              href="tel:0773847202" 
+              className="text-slate-300 hover:text-rose-400 font-extrabold transition-colors underline decoration-rose-400/30"
+              dir="ltr"
+            >
+              📞 0773847202
+            </a>
+          </div>
         </div>
 
       </div>
