@@ -11,6 +11,7 @@ import FAQ from './components/FAQ';
 import Registration from './components/Registration';
 import Footer from './components/Footer';
 import FloatingWidgets from './components/FloatingWidgets';
+import AdminDashboard from './components/AdminDashboard';
 
 function AppContent() {
   return (
@@ -55,6 +56,12 @@ function AppContent() {
 }
 
 function App() {
+  // Check if visitor is accessing the /admin route
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+  if (path === '/admin') {
+    return <AdminDashboard />;
+  }
+
   return (
     <LanguageProvider>
       <AppContent />

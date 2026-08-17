@@ -62,4 +62,40 @@ app.post('/api/register', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+})
+
+// Admin Auth Middleware Helper
+const checkAdminAuth = (req, res, next) => {
+  const adminPassword = req.headers['x-admin-password'];
+  const expectedPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+  if (adminPassword !== expectedPassword) {
+    return res.status(401).json({ error: 'Access denied: Invalid password' });
+  }
+  next();
+};
+
+// GET: Retrieve all registrations (Admin only)
+app.get('/api/admin/registrations', checkAdminAuth, (req, res) => {
+  const sql = 'SELECT * FROM registrations ORDER BY created_at DESC';
+  db.execute(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching registrations:', err);
+      return res.status(500).json({ error: 'Failed to fetch data.' });
+    }
+    return res.json(results);
+  });
 });
+
+// DELETE: Remove a registration by ID (Admin only)
+app.delete('/api/admin/registrations/:id', checkAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const sql = 'DELETE FROM registrations WHERE id = ?';
+  db.execute(sql, [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting record:', err);
+      return res.status(500).json({ error: 'Failed to delete record.' });
+    }
+    return res.json({ message: 'Record deleted successfully!' });
+  });
+});;
