@@ -72,12 +72,17 @@ export default function AdminDashboard() {
     setPassword('');
   };
 
-  const filteredRegistrations = registrations.filter(
-    (r) =>
-      r.child_name?.toLowerCase().includes(search.toLowerCase()) ||
-      r.parent_name?.toLowerCase().includes(search.toLowerCase()) ||
-      r.phone?.includes(search)
-  );
+  const filteredRegistrations = registrations.filter((r) => {
+    const query = search.toLowerCase();
+    const messageContent = (r.message || r.notes || r.note || r.comments || '').toLowerCase();
+    return (
+      r.child_name?.toLowerCase().includes(query) ||
+      r.parent_name?.toLowerCase().includes(query) ||
+      r.phone?.includes(query) ||
+      r.email?.toLowerCase().includes(query) ||
+      messageContent.includes(query)
+    );
+  });
 
   if (!isAuthenticated) {
     return (
@@ -135,7 +140,7 @@ export default function AdminDashboard() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by child, parent, or phone..."
+            placeholder="Search by child, parent, phone, or message..."
             className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold text-white outline-none focus:border-rose-400"
           />
         </div>
@@ -149,7 +154,8 @@ export default function AdminDashboard() {
                 <th className="p-4">Parent Name</th>
                 <th className="p-4">Age</th>
                 <th className="p-4">Phone</th>
-                <th className="p-4">Email / Note</th>
+                <th className="p-4">Email</th>
+                <th className="p-4">Message / Note</th>
                 <th className="p-4">Date</th>
                 <th className="p-4 text-center">Action</th>
               </tr>
@@ -157,24 +163,28 @@ export default function AdminDashboard() {
             <tbody className="divide-y divide-slate-800">
               {filteredRegistrations.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-8 text-center text-slate-500">No registrations found.</td>
+                  <td colSpan="8" className="p-8 text-center text-slate-500">No registrations found.</td>
                 </tr>
               ) : (
-                filteredRegistrations.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="p-4 font-bold text-white">{r.child_name}</td>
-                    <td className="p-4 text-slate-300">{r.parent_name}</td>
-                    <td className="p-4 text-slate-400">{r.age} yrs</td>
-                    <td className="p-4 text-rose-400 font-mono"><a href={`tel:${r.phone}`}>{r.phone}</a></td>
-                    <td className="p-4 text-slate-400 max-w-xs truncate">{r.email || r.message || '-'}</td>
-                    <td className="p-4 text-slate-500 text-[11px]">{new Date(r.created_at).toLocaleDateString()}</td>
-                    <td className="p-4 text-center">
-                      <button onClick={() => handleDelete(r.id)} className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredRegistrations.map((r) => {
+                  const messageText = r.message || r.notes || r.note || r.comments;
+                  return (
+                    <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="p-4 font-bold text-white">{r.child_name}</td>
+                      <td className="p-4 text-slate-300">{r.parent_name}</td>
+                      <td className="p-4 text-slate-400">{r.age} yrs</td>
+                      <td className="p-4 text-rose-400 font-mono"><a href={`tel:${r.phone}`}>{r.phone}</a></td>
+                      <td className="p-4 text-slate-300">{r.email || '-'}</td>
+                      <td className="p-4 text-slate-400 max-w-xs break-words">{messageText || '-'}</td>
+                      <td className="p-4 text-slate-500 text-[11px] whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
+                      <td className="p-4 text-center">
+                        <button onClick={() => handleDelete(r.id)} className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
